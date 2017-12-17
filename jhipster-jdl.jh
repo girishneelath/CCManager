@@ -1,0 +1,134 @@
+
+DEFAULT_MIN_LENGTH = 2
+DEFAULT_MAX_LENGTH = 42
+DESC_MAX_LENGTH = 250
+CODE_MAX_LENGTH = 6
+
+entity Currency {
+	name String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH),
+    code String required minlength(DEFAULT_MIN_LENGTH) maxlength(CODE_MAX_LENGTH),
+    description String maxlength(DESC_MAX_LENGTH),
+    createdDateTime ZonedDateTime,
+    modifiedDateTime ZonedDateTime
+}
+
+entity Exchange {
+	name String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH),
+  	website String required minlength(DEFAULT_MIN_LENGTH) maxlength(DESC_MAX_LENGTH),
+    description String maxlength(DESC_MAX_LENGTH),
+    createdDateTime ZonedDateTime,
+    modifiedDateTime ZonedDateTime
+}
+
+entity CryptoCurrency {
+	name String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH),
+    code String required minlength(DEFAULT_MIN_LENGTH) maxlength(CODE_MAX_LENGTH),
+    decription String maxlength(DESC_MAX_LENGTH),
+    website String maxlength(DESC_MAX_LENGTH),
+    createdDateTime ZonedDateTime,
+    modifiedDateTime ZonedDateTime
+}
+
+entity Transaction {
+	transactionType TransactionType required,
+    investmentPlan InvestmentPlan required,
+	buyDate ZonedDateTime,
+    buyRate BigDecimal required min(0),
+	actualBuyAmount BigDecimal required min(0),
+    quantity BigDecimal required min(0),
+    description String maxlength(DESC_MAX_LENGTH),
+    sellRate BigDecimal min(0),
+	actualSellAmount BigDecimal min(0),
+    profitOrLose BigDecimal min(0),
+    transactionStatus TransactionStatus required,
+    createdDateTime ZonedDateTime,
+    modifiedDateTime ZonedDateTime
+}
+
+entity Investment {
+	investmentDate ZonedDateTime,
+    amount BigDecimal required min(0),
+    description String maxlength(DESC_MAX_LENGTH),
+    createdDateTime ZonedDateTime,
+    modifiedDateTime ZonedDateTime
+}
+
+entity Reminder {
+    selector Selector required,
+    operator Operator required,
+	amount BigDecimal required min(0),
+    enabled Boolean,
+    description String maxlength(DESC_MAX_LENGTH),
+    createdDateTime ZonedDateTime,
+    modifiedDateTime ZonedDateTime
+}
+
+entity Preference {	
+    emailNotification Boolean,
+    recieverEmail String,
+    mobileNumber Long maxlength(10),
+    smsNotification Boolean,
+    dailyReport Boolean,
+    weeklyReport Boolean,
+    monthlyReport Boolean,
+    createdDateTime ZonedDateTime,
+    modifiedDateTime ZonedDateTime
+}
+
+enum Status {
+	ENABLED, DISABLED
+}
+
+enum Operator {
+	GREATER_THAN_OR_EQUALS, LESS_THAN_OR_EQUALS
+}
+
+enum Selector {
+	BUY_AMOUNT, SELL_AMOUNT
+}
+
+enum TransactionType {
+	BUY,
+	SELL
+}
+
+enum TransactionStatus {
+	OPEN, CLOSED
+}
+
+enum InvestmentPlan {
+	LONG_TERM, SHORT_TERM
+}
+
+
+relationship OneToOne {
+	Preference{user} to User
+}
+
+relationship OneToMany {
+	Exchange{supprtedCurrency} to CryptoCurrency
+}
+
+relationship ManyToOne {
+	Transaction{cryptoCurrency} to CryptoCurrency,
+    Currency{createdBy} to User,
+    Exchange{createdBy} to User,
+    CryptoCurrency{createdBy} to User,
+    Transaction{currency} to Currency,
+    Transaction{exchange} to Exchange,
+    Transaction{cryptoCurrency} to CryptoCurrency,
+    Transaction{user} to User,
+    Investment{currency} to Currency,
+    Investment{user} to User,
+    Reminder{currency} to Currency,
+    Reminder{cryptoCurrency} to CryptoCurrency,
+    Reminder{user} to User,
+    Preference{defaultCurrency} to Currency
+}
+
+paginate * with pagination
+
+dto * with mapstruct
+
+// Set service options to all except few
+service * with serviceImpl
